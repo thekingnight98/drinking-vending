@@ -24,7 +24,7 @@
                         v-bind="attrs"
                         v-on="on"
                       >
-                        New Item
+                        New Machine
                       </v-btn>
                     </template>
                     <v-card>
@@ -38,31 +38,19 @@
                             <v-col cols="12" sm="6" md="4">
                               <v-text-field
                                 v-model="editedItem.name"
-                                label="Dessert name"
+                                label="Machine Name"
                               ></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6" md="4">
                               <v-text-field
-                                v-model="editedItem.calories"
-                                label="Calories"
+                                v-model="editedItem.location"
+                                label="Location"
                               ></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6" md="4">
                               <v-text-field
-                                v-model="editedItem.fat"
-                                label="Fat (g)"
-                              ></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6" md="4">
-                              <v-text-field
-                                v-model="editedItem.carbs"
-                                label="Carbs (g)"
-                              ></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6" md="4">
-                              <v-text-field
-                                v-model="editedItem.protein"
-                                label="Protein (g)"
+                                v-model="editedItem.balance"
+                                label="balance"
                               ></v-text-field>
                             </v-col>
                           </v-row>
@@ -103,8 +91,12 @@
                   </v-dialog>
                 </v-toolbar>
               </template>
-              <template :[`item.actions`]="{ item }">
-                <v-icon small class="mr-2" @click="editItem(item)">
+              <template v-slot:[`item.actions`]="{ item }">
+                <v-icon
+                  small
+                  class="mr-2"
+                  @click="editItem(item, (saveEdited = true))"
+                >
                   mdi-pencil
                 </v-icon>
                 <v-icon small @click="deleteItem(item)">
@@ -112,7 +104,7 @@
                 </v-icon>
               </template>
               <template v-slot:no-data>
-                <v-btn color="primary" @click="initialize">
+                <v-btn color="primary" @click="GetMachine">
                   Reset
                 </v-btn>
               </template>
@@ -125,43 +117,41 @@
 </template>
 
 <script>
+import { mapActions, mapState } from "vuex";
+import { GetAllMachine, UpdateMachine, CreateMachine } from "../api/index";
 export default {
   data: () => ({
+    saveEdited: false,
     dialog: false,
     dialogDelete: false,
     headers: [
       {
-        text: "Dessert (100g serving)",
+        text: "Name",
         align: "start",
         sortable: false,
         value: "name",
       },
-      { text: "Calories", value: "calories" },
-      { text: "Fat (g)", value: "fat" },
-      { text: "Carbs (g)", value: "carbs" },
-      { text: "Protein (g)", value: "protein" },
+      { text: "Location", value: "location" },
+      { text: "balance", value: "balance" },
       { text: "Actions", value: "actions", sortable: false },
     ],
     desserts: [],
     editedIndex: -1,
     editedItem: {
       name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      location: "",
+      balance: 0,
     },
     defaultItem: {
       name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      location: "",
+      balance: 0,
     },
   }),
   computed: {
+    ...mapState(["machineData"]),
     formTitle() {
-      return this.editedIndex === -1 ? "New Item" : "Edit Item";
+      return this.editedIndex === -1 ? " New Machine" : "Edit Machine";
     },
   },
 
@@ -173,90 +163,63 @@ export default {
       val || this.closeDelete();
     },
   },
-
   created() {
-    this.initialize();
+    this.GetMachine();
+    // this.initialize();
   },
 
   methods: {
-    initialize() {
-      this.desserts = [
-        {
-          name: "Frozen Yogurt",
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-        },
-        {
-          name: "Ice cream sandwich",
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-        },
-        {
-          name: "Eclair",
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-        },
-        {
-          name: "Cupcake",
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3,
-        },
-        {
-          name: "Gingerbread",
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9,
-        },
-        {
-          name: "Jelly bean",
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0,
-        },
-        {
-          name: "Lollipop",
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0,
-        },
-        {
-          name: "Honeycomb",
-          calories: 408,
-          fat: 3.2,
-          carbs: 87,
-          protein: 6.5,
-        },
-        {
-          name: "Donut",
-          calories: 452,
-          fat: 25.0,
-          carbs: 51,
-          protein: 4.9,
-        },
-        {
-          name: "KitKat",
-          calories: 518,
-          fat: 26.0,
-          carbs: 65,
-          protein: 7,
-        },
-      ];
+    ...mapActions(["setMachineData"]),
+    async GetMachine() {
+      try {
+        const res = await GetAllMachine();
+        const result = res.data;
+        console.log("result = ", result);
+        this.desserts = result;
+      } catch (error) {
+        console.log(error);
+      }
     },
 
+    async UpdateMachine(item) {
+      const payload = {
+        name: item.name,
+        balance: item.balance,
+        countStock: item.countStock,
+        location: item.location,
+        usercount: item.usercount,
+      };
+      console.log("item._id = ", payload);
+      try {
+        const res = await UpdateMachine(item._id, payload);
+        const result = res.data;
+        console.log("result =", result);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async CreateMachine(item) {
+      const payload = {
+        name: item.name,
+        balance: item.balance,
+        countStock: 1,
+        location: item.location,
+        usercount: 1,
+      };
+
+      try {
+        const res = await CreateMachine(payload);
+        const result = res.data;
+        console.log("result =", result);
+      } catch (error) {
+        console.log(error);
+      }
+    },
     editItem(item) {
       this.editedIndex = this.desserts.indexOf(item);
+      console.log("this.editedIndex =", this.editedIndex);
       this.editedItem = Object.assign({}, item);
+      console.log("editedItem = ", this.editedItem);
       this.dialog = true;
     },
 
@@ -288,10 +251,27 @@ export default {
     },
 
     save() {
-      if (this.editedIndex > -1) {
+      // if (this.editedIndex > -1) {
+      //   Object.assign(this.desserts[this.editedIndex], this.editedItem);
+
+      // } else {
+      //   console.log('else case');
+      //   this.desserts.push(this.editedItem);
+      // }
+      // this.close();
+      console.log("this.editedItem =", this.editedItem);
+      console.log("this.saveEdited", this.saveEdited);
+      if (this.saveEdited) {
+        console.log("เข้านี่ if !!!");
+        this.UpdateMachine(this.editedItem);
         Object.assign(this.desserts[this.editedIndex], this.editedItem);
-      } else {
-        this.desserts.push(this.editedItem);
+        this.setMachineData(this.desserts);
+        this.saveEdited = false;
+      }
+      if (!this.saveEdited) {
+        this.CreateMachine(this.editedItem);
+        this.desserts.push(this.editedItem)
+        this.setMachineData(this.desserts);
       }
       this.close();
     },

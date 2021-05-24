@@ -85,6 +85,7 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
+import { GetAllMachine } from "../api/index";
 
 export default {
   components: {},
@@ -142,9 +143,16 @@ export default {
     ...mapActions(["setMachineData"]),
     init() {
       // rest api get all machine
-      const res = this.items;
-      console.log(res);
-      this.setMachineData(res);
+      // const res = this.items;
+      // console.log(res);
+      // this.setMachineData(res);
+      this.getMachine()
+    },
+    async getMachine(){
+      const res = await GetAllMachine();
+      const result = res.data
+      this.setMachineData(result);
+      console.log("result = " , result);
     },
     onPayment(item) {
       this.dialog = true;
