@@ -92,11 +92,7 @@
                 </v-toolbar>
               </template>
               <template v-slot:[`item.actions`]="{ item }">
-                <v-icon
-                  small
-                  class="mr-2"
-                  @click="editItem(item, (saveEdited = true))"
-                >
+                <v-icon small class="mr-2" @click="editItem(item, saveEdited)">
                   mdi-pencil
                 </v-icon>
                 <v-icon small @click="deleteItem(item)">
@@ -121,7 +117,7 @@ import { mapActions, mapState } from "vuex";
 import { GetAllMachine, UpdateMachine, CreateMachine } from "../api/index";
 export default {
   data: () => ({
-    saveEdited: false,
+    saveEdited: "yes",
     dialog: false,
     dialogDelete: false,
     headers: [
@@ -181,7 +177,7 @@ export default {
       }
     },
 
-    async UpdateMachine(item) {
+    async UpdateMachine(item , index) {
       const payload = {
         name: item.name,
         balance: item.balance,
@@ -194,6 +190,9 @@ export default {
         const res = await UpdateMachine(item._id, payload);
         const result = res.data;
         console.log("result =", result);
+        if (result) {
+          Object.assign(this.desserts[index], item);
+        }
       } catch (error) {
         console.log(error);
       }
@@ -211,15 +210,18 @@ export default {
         const res = await CreateMachine(payload);
         const result = res.data;
         console.log("result =", result);
+        if (result) {
+          this.desserts.push(item);
+        }
       } catch (error) {
-        console.log(error);
+        console.log("Create ไม่สำเร็จ !!" , error);
       }
     },
     editItem(item) {
       this.editedIndex = this.desserts.indexOf(item);
       console.log("this.editedIndex =", this.editedIndex);
       this.editedItem = Object.assign({}, item);
-      console.log("editedItem = ", this.editedItem);
+      // console.log("editedItem = ", this.editedItem);
       this.dialog = true;
     },
 
@@ -251,27 +253,15 @@ export default {
     },
 
     save() {
-      // if (this.editedIndex > -1) {
-      //   Object.assign(this.desserts[this.editedIndex], this.editedItem);
-
-      // } else {
-      //   console.log('else case');
-      //   this.desserts.push(this.editedItem);
-      // }
-      // this.close();
-      console.log("this.editedItem =", this.editedItem);
-      console.log("this.saveEdited", this.saveEdited);
-      if (this.saveEdited) {
-        console.log("เข้านี่ if !!!");
-        this.UpdateMachine(this.editedItem);
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
-        this.setMachineData(this.desserts);
-        this.saveEdited = false;
-      }
-      if (!this.saveEdited) {
+      if (this.editedIndex > -1) {
+        console.log("this.editedItem = " , this.editedItem);
+        console.log("if case ");
+        // Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        this.UpdateMachine(this.editedItem , this.editedIndex);
+      } else {
+        console.log("new เข้า else case");
+        // this.desserts.push(this.editedItem);
         this.CreateMachine(this.editedItem);
-        this.desserts.push(this.editedItem)
-        this.setMachineData(this.desserts);
       }
       this.close();
     },

@@ -18,7 +18,7 @@
               <h1 class="text-number-machine">{{ item.name }}</h1>
               <div class="text-location">location : {{ item.location }}</div>
               <div class="text-center label-couting">
-                count : <span class="text-couting">{{ item.balance }}</span>
+                balance : <span class="text-couting">{{ item.balance }}</span>
               </div>
             </div>
           </div>
@@ -37,7 +37,7 @@
           </div>
           <div class="label-location">
             จำนวนสินค้าคงเหลือ :
-            <span class="text-couting">{{ UserPayData.countStock }}</span> ชิ้น
+            <span class="text-couting">{{ UserPayData.balance }}</span> ชิ้น
           </div>
         </v-card-text>
 
@@ -52,6 +52,7 @@
                 label="ชิ้น"
                 :value="UserPayData.userCount"
                 v-model="UserPayData.userCount"
+                type="number"
                 required
               ></v-text-field>
               <span class="label-normal-text" v-if="this.StoreCounting > 0">
@@ -59,8 +60,8 @@
                 <span class="text-red-couting">{{ this.StoreCounting }}</span>
                 ชิ้น
               </span>
-              <span v-else class="text-couting"
-                >กรุณากรอกจำนวนให้ถูกต้องด้วย !!!</span
+              <span v-else class="text-red-couting"
+                >สินค้าไม่พอจำหน่าย !!!</span
               >
             </v-col>
           </v-row>
@@ -136,7 +137,7 @@ export default {
   computed: {
     ...mapState(["machineData"]),
     StoreCounting() {
-      return this.UserPayData.countStock - this.UserPayData.userCount;
+      return this.UserPayData.balance - this.UserPayData.userCount;
     },
   },
   methods: {
@@ -155,16 +156,17 @@ export default {
       console.log("result = " , result);
     },
     onPayment(item) {
+      console.log("item = " , item);
       this.dialog = true;
       const data = {
         name: item.name,
         id: item.id,
         location: item.location,
-        countStock: item.stock,
-        userCount: item.userCount,
+        countStock: item.countStock,
+        userCount: item.usercount,
+        balance : item.balance
       };
       this.UserPayData = data;
-      console.log("data = ", data);
     },
     SaveUserPayData(temp) {
       console.log("temp = ", temp);
