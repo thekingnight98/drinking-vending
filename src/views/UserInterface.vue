@@ -4,6 +4,12 @@
       <Loading></Loading>
     </div>
     <div v-else>
+      <v-alert v-if="alertDone" text type="success">
+        <strong>Order completed</strong>
+      </v-alert>
+      <v-alert v-if="alertFail" text type="error">
+        <strong>Order failed</strong>
+      </v-alert>
       <v-container class="content-bg">
         <v-row>
           <v-col>
@@ -118,40 +124,8 @@ export default {
     return {
       dialog: false,
       loading: false,
-      items: [
-        {
-          id: 1,
-          name: "machine1",
-          location: "Phra Nakhon District",
-          stock: 30,
-          userCount: 1,
-          balance: 30,
-        },
-        {
-          id: 2,
-          name: "machine2",
-          location: "Dusit District",
-          stock: 30,
-          userCount: 1,
-          balance: 30,
-        },
-        {
-          id: 3,
-          name: "machine3",
-          location: "Nong Chok District",
-          stock: 30,
-          userCount: 1,
-          balance: 30,
-        },
-        {
-          id: 4,
-          name: "machine4",
-          location: "Bang Rak District",
-          stock: 30,
-          userCount: 1,
-          balance: 30,
-        },
-      ],
+      alertDone: false,
+      alertFail: false,
       UserPayData: {},
       SaveUserPay: {},
     };
@@ -170,7 +144,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(["setMachineData" , "setUserPay"]),
+    ...mapActions(["setMachineData", "setUserPay"]),
     init() {
       // rest api get all machine
       this.getMachine();
@@ -202,7 +176,7 @@ export default {
       this.dialog = true;
     },
     SendNotify() {
-      console.log('เข้า send noti');
+      console.log("เข้า send noti");
       const axios = require("axios");
       const querystring = require("querystring");
 
@@ -242,15 +216,23 @@ export default {
         const result = res.data;
         console.log("result = ", result);
         this.dialog = false;
+        this.alertDone = true;
+        setInterval(() => {
+          this.alertDone = false;
+        }, 3000);
         this.getMachine();
         if (result && payload.balance <= 10) {
-        this.setUserPay(payload)
-         this.$router.push({ name: "SendEmail" });
+          this.setUserPay(payload);
+          this.$router.push({ name: "SendEmail" });
         }
         this.loading = false;
       } catch (error) {
         console.log(error);
         this.loading = false;
+        this.alertFail = true;
+        setInterval(() => {
+          this.alertFail = false;
+        }, 3000);
       }
     },
   },

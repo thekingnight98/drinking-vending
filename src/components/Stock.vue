@@ -1,6 +1,12 @@
 <template>
   <div class="mt-4">
     <v-container>
+      <v-alert v-if="alertDone" text type="success">
+        <strong>Update completed</strong>
+      </v-alert>
+      <v-alert v-if="alertFail" text type="error">
+        <strong>Update failed</strong>
+      </v-alert>
       <v-row>
         <v-col>
           <template>
@@ -120,6 +126,8 @@ export default {
       location: "",
       balance: 0,
     },
+    alertDone: false,
+    alertFail: false,
   }),
   computed: {
     ...mapState(["machineData"]),
@@ -154,7 +162,7 @@ export default {
       }
     },
 
-    async UpdateMachine(item , index) {
+    async UpdateMachine(item, index) {
       const payload = {
         name: item.name,
         balance: item.balance,
@@ -170,8 +178,16 @@ export default {
         if (result) {
           Object.assign(this.desserts[index], item);
         }
+        this.alertDone = true;
+        setInterval(() => {
+          this.alertDone = false;
+        }, 3000);
       } catch (error) {
         console.log(error);
+        this.alertFail = true;
+        setInterval(() => {
+          this.alertFail = false;
+        }, 3000);
       }
     },
     async CreateMachine(item) {
@@ -190,8 +206,16 @@ export default {
         if (result) {
           this.desserts.push(item);
         }
+        this.alertDone = true;
+        setInterval(() => {
+          this.alertDone = false;
+        }, 3000);
       } catch (error) {
-        console.log("Create ไม่สำเร็จ !!" , error);
+        console.log("Create ไม่สำเร็จ !!", error);
+        this.alertFail = true;
+        setInterval(() => {
+          this.alertFail = false;
+        }, 3000);
       }
     },
     editItem(item) {
@@ -219,10 +243,10 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        console.log("this.editedItem = " , this.editedItem);
+        console.log("this.editedItem = ", this.editedItem);
         console.log("if case ");
         // Object.assign(this.desserts[this.editedIndex], this.editedItem);
-        this.UpdateMachine(this.editedItem , this.editedIndex);
+        this.UpdateMachine(this.editedItem, this.editedIndex);
       } else {
         console.log("new เข้า else case");
         // this.desserts.push(this.editedItem);
