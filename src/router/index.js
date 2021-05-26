@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import UserInterface from '../views/UserInterface.vue'
 import Stock from '../components/Stock.vue'
 import UserPay from '../components/UserPay.vue'
+import SendEmail from '../views/contractForm.vue'
 
 
 Vue.use(VueRouter)
@@ -22,6 +23,11 @@ const routes = [
     path: '/user-pay',
     name: 'UserPay',
     component: UserPay
+  },
+  {
+    path: '/send-email',
+    name: 'SendEmail',
+    component: SendEmail
   },
 ]
 
