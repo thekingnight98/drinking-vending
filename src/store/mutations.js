@@ -7,6 +7,9 @@ const mutations = {
     [types.SET_MACHINE_DATA](state, data) {
         state.machineData = data;
     },
+    [types.SET_USER_PAY](state, data) {
+        state.saveUserPay = data;
+    },
 };
 
 export default mutations;

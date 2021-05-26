@@ -170,7 +170,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(["setMachineData"]),
+    ...mapActions(["setMachineData" , "setUserPay"]),
     init() {
       // rest api get all machine
       this.getMachine();
@@ -241,10 +241,10 @@ export default {
         const res = await UpdateMachine(data.id, payload);
         const result = res.data;
         console.log("result = ", result);
-
         this.dialog = false;
         this.getMachine();
         if (result && payload.balance <= 10) {
+        this.setUserPay(payload)
          this.$router.push({ name: "SendEmail" });
         }
         this.loading = false;

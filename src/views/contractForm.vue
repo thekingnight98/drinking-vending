@@ -1,12 +1,15 @@
 <template>
   <v-form @submit.prevent="sendEmail" v-model="valid">
     <v-container>
+      <h1>Stock สินค้าของคุณเหลือน้อย</h1>
+      <h2>ระบบจะทำการส่ง email แจ้งเตือนไปยังบริษัท</h2>
       <v-row>
         <v-col cols="12" md="4">
           <v-text-field
-            v-model="firstname"
+            v-model="saveUserPay.location"
+            :value="saveUserPay.location"
             name="name"
-            label="First name"
+            label="Location name"
             required
           ></v-text-field>
         </v-col>
@@ -30,9 +33,10 @@
         <v-col cols="12" md="12">
           <v-textarea
             solo
-            v-model="message"
+            v-model="processMsg"
             name="message"
             label="message"
+            :value="processMsg"
             required
           ></v-textarea>
         </v-col>
@@ -54,23 +58,31 @@
 
 <script>
 import emailjs from "emailjs-com";
+import { mapActions, mapState } from "vuex";
 
 export default {
   data() {
     return {
       valid: false,
-      firstname: "",
+      location: "",
       message: "",
-      subject: "",
-      email: "",
+      subject: "Stock สินค้าของคุณเหลือน้อย",
+      email: "arm@example.com",
       emailRules: [
         (v) => !!v || "E-mail is required",
         (v) => /.+@.+/.test(v) || "E-mail must be valid",
       ],
     };
   },
+  computed: {
+    ...mapState(["saveUserPay"]),
+    processMsg() {
+      return `สินค้าคงเหลือจำนวน ${this.saveUserPay.balance} ชิ้น ที่สาขา ${this.saveUserPay.location}`;
+    },
+  },
   methods: {
-    sendEmail: (e) => {
+    ...mapActions(["setUserPay"]),
+    async sendEmail(e) {
       emailjs
         .sendForm(
           "service_bs8ocvu",
@@ -88,9 +100,7 @@ export default {
           }
         );
       e.target.reset();
-      this.$router.push({
-        name: "UserInterface",
-      });
+      await this.$router.push({ name: "UserInterface" });
     },
   },
 };

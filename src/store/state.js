@@ -1,7 +1,8 @@
 const state = {
     userProfile: null,
     selectedTab: 0,
-    machineData : []
+    machineData : [],
+    saveUserPay : {}
 };
 
 export default state;
